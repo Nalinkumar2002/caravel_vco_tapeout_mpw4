@@ -47,7 +47,7 @@ It is a Current Starved Voltage Controlled Oscillator targerting 180nm tech for 
  * [Observations](#Observations)
  * [Future Work](#Future-work)
  * [Author](#Author)
- * [Acknowledgements](#Acknowledgements)
+ 
    
    
 
