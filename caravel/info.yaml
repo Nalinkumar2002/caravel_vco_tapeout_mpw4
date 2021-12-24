@@ -1,0 +1,19 @@
+--- 
+project: 
+  description: "Current Starved Voltage Controlled Oscillator"
+  foundry: "SkyWater"
+  git_url: "https://github.com/Nalinkumar2002/caravel_vco_tapeout_mpw4.git"
+  organization: ""
+  organization_url: ""
+  owner: "Nalinkumar S"
+  process: "SKY130"
+  project_name: "Current Starved Voltage Controlled Oscillator"
+  project_id: "00000000"
+  tags: 
+    - "Open MPW"
+    - "Test Harness"
+  category: "Test Harness"
+  top_level_netlist: "caravel/spi/lvs/caravan.spice"
+  user_level_netlist: "netgen/user_analog_project_wrapper.spice"
+  version: "1.00"
+  cover_image: "docs/source/_static/caravel_harness.png"
