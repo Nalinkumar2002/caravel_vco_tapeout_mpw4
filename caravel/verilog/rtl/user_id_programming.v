@@ -20,7 +20,7 @@
 // a parameter
 
 module user_id_programming #(
-    parameter [ 0:0] USER_PROJECT_ID = 32'h0
+    parameter USER_PROJECT_ID = 32'h0
 ) (
 `ifdef USE_POWER_PINS
     inout VPWR,

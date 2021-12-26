@@ -161,8 +161,8 @@ module pass_thru_tb;
 	    read_byte(tbdata);
 	    end_csb();
 	    #10;
-	    $display("Read data = 0x%02x (should be 0x10)", tbdata);
-	    if(tbdata !== 8'h10) begin 
+	    $display("Read data = 0x%02x (should be 0x11)", tbdata);
+	    if(tbdata !== 8'h11) begin 
 			`ifdef GL
 				$display("Monitor: Test HK SPI Pass-thru (GL) Failed"); $finish; 
 			`else
@@ -264,8 +264,8 @@ module pass_thru_tb;
 	    read_byte(tbdata);
 	    end_csb();
 	    #10;
-	    $display("Read data = 0x%02x (should be 0x10)", tbdata);
-	    if(tbdata !== 8'h10) begin 
+	    $display("Read data = 0x%02x (should be 0x11)", tbdata);
+	    if(tbdata !== 8'h11) begin 
 			`ifdef GL
 				$display("Monitor: Test HK SPI Pass-thru (GL) Failed"); $finish; 
 			`else

@@ -20,16 +20,17 @@
 // --------------------------------------------------------
 
 /*
- *	System Control Test
- *	- Enables SPI master
- *	- Uses SPI master to internally access the housekeeping SPI
- *      - Reads default value of SPI-Controlled registers
- *      - Flags failure/success using mprj_io
+ *	System control test
+ *      - Sets GPIO to monitor the core and user clocks
+ *
+ *	This test is basically just the first part of the
+ *	PLL test, with the PLL bypassed.  Unlike the PLL
+ *	test, it can be run on a gate-level netlist.
+ *
  */
 void main()
 {
     int i;
-    uint32_t value;
 
     reg_mprj_datal = 0;
 
@@ -53,111 +54,46 @@ void main()
     reg_mprj_io_17 = GPIO_MODE_MGMT_STD_OUTPUT;
     reg_mprj_io_16 = GPIO_MODE_MGMT_STD_OUTPUT;
 
-    // Configure next 8 bits for writing the SPI value read on GPIO
+    /* Monitor pins must be set to output */
     reg_mprj_io_15 = GPIO_MODE_MGMT_STD_OUTPUT;
     reg_mprj_io_14 = GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_13 = GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_12 = GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_11 = GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_10 = GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_9  = GPIO_MODE_MGMT_STD_OUTPUT;
-    reg_mprj_io_8  = GPIO_MODE_MGMT_STD_OUTPUT;
 
     /* Apply configuration */
     reg_mprj_xfer = 1;
     while (reg_mprj_xfer == 1);
 
     // Start test
+
+    /*
+     *-------------------------------------------------------------
+     * Register 2620_0004	reg_clk_out_dest
+     * SPI address 0x1b = Output redirect
+     * bit 0 = trap to mprj_io[13]
+     * bit 1 = clk  to mprj_io[14]
+     * bit 2 = clk2 to mprj_io[15]
+     *-------------------------------------------------------------
+     */
+
+    // Monitor the core clock and user clock on mprj_io[14] and mprj_io[15]
+    // reg_clk_out_dest = 0x6 to turn on, 0x0 to turn off
+
+    // Write checkpoint for making sure nothing is counted when monitoring is off
     reg_mprj_datal = 0xA0400000;
+    reg_clk_out_dest = 0x0;
+    reg_clk_out_dest = 0x0;
+    reg_mprj_datal = 0xA0410000;
 
-    // Enable SPI master
-    // SPI master configuration bits:
-    // bits 7-0:	Clock prescaler value (default 2)
-    // bit  8:		MSB/LSB first (0 = MSB first, 1 = LSB first)
-    // bit  9:		CSB sense (0 = inverted, 1 = noninverted)
-    // bit 10:		SCK sense (0 = noninverted, 1 = inverted)
-    // bit 11:		mode (0 = read/write opposite edges, 1 = same edges)
-    // bit 12:		stream (1 = CSB ends transmission)
-    // bit 13:		enable (1 = enabled)
-    // bit 14:		IRQ enable (1 = enabled)
-    // bit 15:		Connect to housekeeping SPI (1 = connected)
+    // Write checkpoint for core clock counting (PLL bypassed)
+    reg_mprj_datal = 0xA0420000;
+    reg_clk_out_dest = 0x2;
+    reg_clk_out_dest = 0x0;
+    reg_mprj_datal = 0xA0430000;
 
-    reg_spimaster_config = 0xa002;	// Enable, prescaler = 2,
-					// connect to housekeeping SPI
-
-    // Apply stream read (0x40 + 0x03) and read back one byte 
-
-    reg_spimaster_config = 0xb002;	// Apply stream mode
-    reg_spimaster_data = 0x40;		// Write 0x40 (read mode)
-    reg_spimaster_data = 0x01;		// Write 0x01 (start address)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0410000 | (value << 8);	// Mfgr ID (high)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0420000 | (value << 8);	// Mfgr ID (low)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0430000 | (value << 8);	// Prod ID
-
-    reg_spimaster_config = 0xa102;	// Release CSB (ends stream mode)
-    reg_spimaster_config = 0xb002;	// Apply stream mode
-    reg_spimaster_data = 0x40;		// Write 0x40 (read mode)
-    reg_spimaster_data = 0x08;		// Write 0x08 (start address)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0440000 | (value << 8);	// PLL enable
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0450000 | (value << 8);	// PLL bypass
-
-    reg_spimaster_config = 0xa102;	// Release CSB (ends stream mode)
-    reg_spimaster_config = 0xb002;	// Apply stream mode
-    reg_spimaster_data = 0x40;		// Write 0x40 (read mode)
-    reg_spimaster_data = 0x0d;		// Write 0x0d (start address)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0460000 | (value << 8);	// PLL trim (2 high bits)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0470000 | (value << 8);	// PLL trim (2nd byte)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0480000 | (value << 8);	// PLL trim (3rd byte)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA0490000 | (value << 8);	// PLL trim (low byte)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA04a0000 | (value << 8);	// PLL select (3 lowest bits)
-
-    reg_spimaster_data = 0x00;		// Write 0x00 for read
-    value = reg_spimaster_data;		// Read back byte
-    // Write checkpoint
-    reg_mprj_datal = 0xA04b0000 | (value << 8);	// PLL divider (5 lowest bits)
-
-    reg_spimaster_config = 0xa102;	// Release CSB (ends stream mode)
-    reg_spimaster_config = 0x2102;	// Release housekeeping SPI
+    // Write checkpoint for user clock counting (PLL bypassed)
+    reg_mprj_datal = 0xA0440000;
+    reg_clk_out_dest = 0x4;
+    reg_clk_out_dest = 0x0;
+    reg_mprj_datal = 0xA0450000;
 
     // End test
     reg_mprj_datal = 0xA0900000;

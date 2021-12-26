@@ -18,10 +18,10 @@ BLOCKS = $(shell find * -maxdepth 0 -type d)
 CONFIG = $(foreach block,$(BLOCKS), ./$(block)/config.tcl)
 CLEAN = $(foreach block,$(BLOCKS), clean-$(block))
 
-OPENLANE_TAG ?= 2021.09.19_20.25.16
+OPENLANE_TAG ?= 2021.11.23_01.42.34
 OPENLANE_IMAGE_NAME ?= efabless/openlane:$(OPENLANE_TAG)
-OPENLANE_BASIC_COMMAND = "cd /project/openlane && flow.tcl -design ./$* -save_path .. -save -tag $* -overwrite"
-OPENLANE_INTERACTIVE_COMMAND = "cd /project/openlane && flow.tcl -it -file ./$*/interactive.tcl"
+OPENLANE_BASIC_COMMAND = "cd $(PWD)/../openlane && flow.tcl -design ./$* -save_path .. -save -tag $* -overwrite"
+OPENLANE_INTERACTIVE_COMMAND = "cd $(PWD)/../openlane && flow.tcl -it -file ./$*/interactive.tcl"
 
 all: $(BLOCKS)
 
@@ -42,19 +42,21 @@ endif
 	@sleep 1
 
 	@if [ -f ./$*/interactive.tcl ]; then\
-		docker run -it -v $(OPENLANE_ROOT):/openLANE_flow \
+		docker run -it -v $(OPENLANE_ROOT):/openlane \
 		-v $(PDK_ROOT):$(PDK_ROOT) \
-		-v $(PWD)/..:/project \
+		-v $(PWD)/..:$(PWD)/.. \
 		-v $(CARAVEL_ROOT):$(CARAVEL_ROOT) \
+		-v $(MGMT_AREA_ROOT):$(MGMT_AREA_ROOT) \
 		-e PDK_ROOT=$(PDK_ROOT) \
 		-e CARAVEL_ROOT=$(CARAVEL_ROOT) \
 		-u $(shell id -u $(USER)):$(shell id -g $(USER)) \
 		$(OPENLANE_IMAGE_NAME) sh -c $(OPENLANE_INTERACTIVE_COMMAND);\
 	else\
-		docker run -it -v $(OPENLANE_ROOT):/openLANE_flow \
+		docker run -it -v $(OPENLANE_ROOT):/openlane \
 		-v $(PDK_ROOT):$(PDK_ROOT) \
-		-v $(PWD)/..:/project \
+		-v $(PWD)/..:$(PWD)/.. \
 		-v $(CARAVEL_ROOT):$(CARAVEL_ROOT) \
+		-v $(MGMT_AREA_ROOT):$(MGMT_AREA_ROOT) \
 		-e PDK_ROOT=$(PDK_ROOT) \
 		-e CARAVEL_ROOT=$(CARAVEL_ROOT) \
 		-u $(shell id -u $(USER)):$(shell id -g $(USER)) \

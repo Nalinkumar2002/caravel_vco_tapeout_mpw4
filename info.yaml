@@ -2,12 +2,12 @@
 project: 
   description: "Current Starved Voltage Controlled Oscillator"
   foundry: "SkyWater"
-  git_url: "https://github.com/Nalinkumar2002/caravel_vco_tapeout_mpw4.git"
+  git_url: "https://github.com/rohinthram/nalin_csvco_tapeout_mpw4.git"
   organization: ""
   organization_url: ""
   owner: "Nalinkumar S"
   process: "SKY130"
-  project_name: "Current Starved Voltage Controlled Oscillator"
+  project_name: "Current Starved VCO"
   project_id: "00000000"
   tags: 
     - "Open MPW"

@@ -15,8 +15,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-#ifndef _STRIVE_H_
-#define _STRIVE_H_
+#ifndef _CARAVEL_H_
+#define _CARAVEL_H_
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -31,7 +31,6 @@ extern uint32_t flashio_worker_end;
 
 // Storage area (MGMT: 0x0100_0000, User: 0x0200_0000)
 #define reg_rw_block0  (*(volatile uint32_t*)0x01000000)
-#define reg_rw_block1  (*(volatile uint32_t*)0x01100000)
 #define reg_ro_block0  (*(volatile uint32_t*)0x02000000)
 
 // UART (0x2000_0000)
@@ -66,7 +65,7 @@ extern uint32_t flashio_worker_end;
 // User Project Control (0x2300_0000)
 #define reg_mprj_xfer (*(volatile uint32_t*)0x26000000)
 #define reg_mprj_pwr  (*(volatile uint32_t*)0x26000004)
-#define reg_mprj_irq  (*(volatile uint32_t*)0x26000008)
+#define reg_mprj_irq  (*(volatile uint32_t*)0x26100014)
 #define reg_mprj_datal (*(volatile uint32_t*)0x2600000c)
 #define reg_mprj_datah (*(volatile uint32_t*)0x26000010)
 
@@ -116,6 +115,20 @@ extern uint32_t flashio_worker_end;
 #define reg_mprj_io_36 (*(volatile uint32_t*)0x260000b4)
 #define reg_mprj_io_37 (*(volatile uint32_t*)0x260000b8)
 
+// Housekeeping
+#define reg_hkspi_status      (*(volatile uint32_t*)0x26100000)
+#define reg_hkspi_chip_id     (*(volatile uint32_t*)0x26100004)
+#define reg_hkspi_user_id     (*(volatile uint32_t*)0x26100008)
+#define reg_hkspi_pll_ena     (*(volatile uint32_t*)0x2610000c)
+#define reg_hkspi_pll_bypass  (*(volatile uint32_t*)0x26100010)
+#define reg_hkspi_irq 	      (*(volatile uint32_t*)0x26100014)
+#define reg_hkspi_reset       (*(volatile uint32_t*)0x26100018)
+#define reg_hkspi_trap 	      (*(volatile uint32_t*)0x26100028)
+#define reg_hkspi_pll_trim    (*(volatile uint32_t*)0x2610001c)
+#define reg_hkspi_pll_source  (*(volatile uint32_t*)0x26100020)
+#define reg_hkspi_pll_divider (*(volatile uint32_t*)0x26100024)
+#define reg_hkspi_disable     (*(volatile uint32_t*)0x26200010)
+
 // User Project Slaves (0x3000_0000)
 #define reg_mprj_slave (*(volatile uint32_t*)0x30000000)
 
@@ -163,11 +176,15 @@ extern uint32_t flashio_worker_end;
 #define SPI_MASTER_IRQ_ENABLE	0x4000
 #define SPI_HOUSEKEEPING_CONN	0x8000
 
-// System Area (0x2F00_0000)
-#define reg_power_good    (*(volatile uint32_t*)0x2F000000)
-#define reg_clk_out_dest  (*(volatile uint32_t*)0x2F000004)
-#define reg_trap_out_dest (*(volatile uint32_t*)0x2F000008)
-#define reg_irq_source    (*(volatile uint32_t*)0x2F00000C)
+// System Area (0x2620_0000)
+#define reg_power_good    (*(volatile uint32_t*)0x26200000)
+#define reg_clk_out_dest  (*(volatile uint32_t*)0x26200004)
+#define reg_trap_out_dest (*(volatile uint32_t*)0x26200004)
+#define reg_irq_source    (*(volatile uint32_t*)0x2620000C)
+
+// Management protection (0x2f00_0000)
+#define reg_irq_enable	  (*(volatile uint32_t*)0x2f000000)
+#define reg_wb_enable	  (*(volatile uint32_t*)0x2f000004)
 
 // Bit fields for reg_power_good
 #define USER1_VCCD_POWER_GOOD 0x01
@@ -178,6 +195,7 @@ extern uint32_t flashio_worker_end;
 // Bit fields for reg_clk_out_dest
 #define CLOCK1_MONITOR 0x01
 #define CLOCK2_MONITOR 0x02
+#define TRAP_MONITOR 0x04
 
 // Bit fields for reg_irq_source
 #define IRQ7_SOURCE 0x01

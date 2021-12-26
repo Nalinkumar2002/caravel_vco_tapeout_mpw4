@@ -32,14 +32,28 @@ SIM?=RTL
 
 PATTERN = pll
 
+# Path to management SoC wrapper repository
+MGMT_CORE_PATH ?= ~/gits/caravel_pico
+ifeq ($(SIM),RTL)
+	MGMT_WRAPPER_PATH = $(MGMT_CORE_PATH)/verilog/rtl
+else
+	MGMT_WRAPPER_PATH = $(MGMT_CORE_PATH)/verilog
+endif
+
 all:  ${PATTERN:=.vcd}
 
 hex:  ${PATTERN:=.hex}
 
 %.vvp: %_tb.v %.hex
+ifeq ($(SIM),RTL)
 	iverilog -Ttyp $(SIM_DEFINES) -I $(BEHAVIOURAL_MODELS) \
-	-I $(PDK_PATH) -I $(IP_PATH) -I $(RTL_PATH) \
+	-I $(PDK_PATH) -I $(IP_PATH) -I $(RTL_PATH) -I $(MGMT_WRAPPER_PATH) \
 	$< -o $@ 
+else
+	iverilog -Ttyp $(SIM_DEFINES) -DGL -I $(BEHAVIOURAL_MODELS) \
+	-I $(PDK_PATH) -I $(VERILOG_PATH) -I $(RTL_PATH) -I $(MGMT_WRAPPER_PATH) \
+	$< -o $@ 
+endif
 
 %.vcd: %.vvp check-env
 	vvp $<

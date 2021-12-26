@@ -1,0 +1,32 @@
+* SPICE3 file created from layout_csvco_b.ext - technology: sky130A
+
+X0 io_analog[2] a_n37524_42676# a_n36790_44094# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.3e+06u l=180000u
+X1 io_analog[3] io_analog[5] a_n37582_43822# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.29e+06u l=180000u
+X2 io_analog[2] a_n37524_42676# a_n36790_43822# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.3e+06u l=180000u
+X3 a_n37318_44600# a_n37142_44184# a_n37582_44094# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X4 a_n37142_44184# a_n37142_43912# a_n37582_43822# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X5 a_n37144_43368# a_n37318_44600# a_n36792_43006# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X6 io_analog[2] a_n37524_42676# a_n37524_42676# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.01e+06u l=180000u
+X7 a_n37144_43368# a_n37318_44600# a_n37582_43006# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X8 a_n37318_44600# a_n37142_44184# a_n36790_44094# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X9 a_n37142_44184# a_n37142_43912# a_n36790_43822# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X10 io_analog[3] io_analog[5] a_n37582_43550# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.29e+06u l=180000u
+X11 io_analog[3] io_analog[5] a_n37582_43278# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.29e+06u l=180000u
+X12 io_analog[3] io_analog[5] a_n37524_42676# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.01e+06u l=180000u
+X13 io_analog[2] a_n37524_42676# a_n36790_43550# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.3e+06u l=180000u
+X14 io_analog[4] a_n37292_44636# io_analog[3] io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=650000u l=180000u
+X15 a_n37142_43912# a_n37142_43640# a_n37582_43550# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X16 a_n37292_44636# a_n37318_44600# io_analog[3] io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.44e+06u l=180000u
+X17 a_n37142_43912# a_n37142_43640# a_n36790_43550# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X18 io_analog[2] a_n37524_42676# a_n36792_43278# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.3e+06u l=180000u
+X19 io_analog[3] io_analog[5] a_n37582_43006# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.29e+06u l=180000u
+X20 io_analog[4] a_n37292_44636# io_analog[2] io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.29e+06u l=180000u
+X21 io_analog[2] a_n37524_42676# a_n36792_43006# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.3e+06u l=180000u
+X22 a_n37142_43640# a_n37144_43368# a_n36792_43278# io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X23 a_n37292_44636# a_n37318_44600# io_analog[2] io_analog[2] sky130_fd_pr__pfet_01v8 ad=0p pd=0u as=0p ps=0u w=2.88e+06u l=180000u
+X24 a_n37142_43640# a_n37144_43368# a_n37582_43278# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=500000u l=180000u
+X25 io_analog[3] io_analog[5] a_n37582_44094# io_analog[3] sky130_fd_pr__nfet_01v8 ad=0p pd=0u as=0p ps=0u w=1.29e+06u l=180000u
+C0 a_n37524_42676# io_analog[3] 2.03fF
+C1 io_analog[5] io_analog[3] 68.25fF
+C2 io_analog[4] io_analog[3] 21.19fF
+C3 io_analog[2] io_analog[3] 56.56fF

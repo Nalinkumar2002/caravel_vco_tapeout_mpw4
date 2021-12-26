@@ -43,21 +43,7 @@
  */
 
 module gpio_control_block #(
-    parameter PAD_CTRL_BITS = 13,
-    // Parameterized initial startup state of the pad.
-    // The default parameters if unspecified is for the pad to be
-    // an input with no pull-up or pull-down, so that it is disconnected
-    // from the outside world.
-    parameter HOLD_INIT = 1'b0,
-    parameter SLOW_INIT = 1'b0,
-    parameter TRIP_INIT = 1'b0,
-    parameter IB_INIT = 1'b0,
-    parameter IENB_INIT = 1'b0,
-    parameter OENB_INIT = `OENB_INIT,
-    parameter DM_INIT = `DM_INIT,
-    parameter AENA_INIT = 1'b0,
-    parameter ASEL_INIT = 1'b0,
-    parameter APOL_INIT = 1'b0
+    parameter PAD_CTRL_BITS = 13
 ) (
     `ifdef USE_POWER_PINS
          inout vccd,
@@ -66,11 +52,16 @@ module gpio_control_block #(
          inout vssd1,
     `endif
 
+    // Power-on defaults
+    input [PAD_CTRL_BITS-1:0] gpio_defaults,
+
     // Management Soc-facing signals
-    input  	     resetn,		// Global reset, locally propagated
+    input  	 resetn,		// Global reset, locally propagated
     output       resetn_out,
-    input  	     serial_clock,		// Global clock, locally propatated
+    input  	 serial_clock,		// Global clock, locally propatated
     output  	 serial_clock_out,
+    input	 serial_load,		// Register load strobe
+    output	 serial_load_out,
 
     output       mgmt_gpio_in,		// Management from pad (input only)
     input        mgmt_gpio_out,		// Management to pad (output only)
@@ -150,26 +141,25 @@ module gpio_control_block #(
     wire user_gpio_in;
     wire gpio_in_unbuf;
     wire gpio_logic1;
+    wire serial_data_pre;
 
     /* Serial shift for the above (latched) values */
     reg [PAD_CTRL_BITS-1:0] shift_register;
 
-    /* Utilize reset and clock to encode a load operation */
-    wire load_data;
-    wire int_reset;
-
     /* Create internal reset and load signals from input reset and clock */
-    assign serial_data_out = shift_register[PAD_CTRL_BITS-1]; 
-    assign int_reset = (~resetn) & (~serial_clock);
-    assign load_data = (~resetn) & serial_clock;
+    assign serial_data_pre = shift_register[PAD_CTRL_BITS-1]; 
 
     /* Propagate the clock and reset signals so that they aren't wired	*/
     /* all over the chip, but are just wired between the blocks.	*/
     assign serial_clock_out = serial_clock;
     assign resetn_out = resetn;
+    assign serial_load_out = serial_load;
 
-    always @(posedge serial_clock or posedge int_reset) begin
-	if (int_reset == 1'b1) begin
+    /* Serial data should be buffered again to avoid hold violations */
+    assign serial_data_out = serial_data_pre & one;
+
+    always @(posedge serial_clock or negedge resetn) begin
+	if (resetn == 1'b0) begin
 	    /* Clear shift register */
 	    shift_register <= 'd0;
 	end else begin
@@ -178,20 +168,20 @@ module gpio_control_block #(
 	end
     end
 
-    always @(posedge load_data or posedge int_reset) begin
-	if (int_reset == 1'b1) begin
-	    /* Initial state on reset:  Pad set to management input */
-	    mgmt_ena <= 1'b1;		// Management SoC has control over all I/O
-	    gpio_holdover <= HOLD_INIT;	 // All signals latched in hold mode
-	    gpio_slow_sel <= SLOW_INIT;	 // Fast slew rate
-	    gpio_vtrip_sel <= TRIP_INIT; // CMOS mode
-            gpio_ib_mode_sel <= IB_INIT; // CMOS mode
-	    gpio_inenb <= IENB_INIT;	 // Input enabled
-	    gpio_outenb <= OENB_INIT;	 // (unused placeholder)
-	    gpio_dm <= DM_INIT;		 // Configured as input only
-	    gpio_ana_en <= AENA_INIT;	 // Digital enabled
-	    gpio_ana_sel <= ASEL_INIT;	 // Don't-care when gpio_ana_en = 0
-	    gpio_ana_pol <= APOL_INIT;	 // Don't-care when gpio_ana_en = 0
+    always @(posedge serial_load or negedge resetn) begin
+	if (resetn == 1'b0) begin
+	    /* Initial state on reset depends on applied defaults */
+	    mgmt_ena <= gpio_defaults[MGMT_EN];
+	    gpio_holdover <= gpio_defaults[HLDH];
+	    gpio_slow_sel <= gpio_defaults[SLOW];
+	    gpio_vtrip_sel <= gpio_defaults[TRIP];
+            gpio_ib_mode_sel <= gpio_defaults[MOD_SEL];
+	    gpio_inenb <= gpio_defaults[INP_DIS];
+	    gpio_outenb <= gpio_defaults[OEB];
+	    gpio_dm <= gpio_defaults[DM+2:DM];
+	    gpio_ana_en <= gpio_defaults[AN_EN];
+	    gpio_ana_sel <= gpio_defaults[AN_SEL];
+	    gpio_ana_pol <= gpio_defaults[AN_POL];
 	end else begin
 	    /* Load data */
 	    mgmt_ena 	     <= shift_register[MGMT_EN];
@@ -224,22 +214,14 @@ module gpio_control_block #(
 
     /* Implement pad control behavior depending on state of mgmt_ena */
 
-//    assign gpio_in_unbuf =    (mgmt_ena) ? 1'b0 : pad_gpio_in;
-//    assign mgmt_gpio_in =    (mgmt_ena) ? ((gpio_inenb == 1'b0) ?
-//					pad_gpio_in : 1'bz) : 1'b0;
-
-    assign gpio_in_unbuf =   pad_gpio_in;
-    // This causes conflict if output and input drivers are both enabled. . .
-    // assign mgmt_gpio_in = (gpio_inenb == 1'b0) ? pad_gpio_in : 1'bz;
-    assign mgmt_gpio_in =    (gpio_inenb == 1'b0 && gpio_outenb == 1'b1)? pad_gpio_in : 1'bz;
-
-    assign pad_gpio_outenb =  (mgmt_ena) ? ((mgmt_gpio_oeb == 1'b1) ? gpio_outenb :
-					1'b0) : user_gpio_oeb;
-    assign pad_gpio_out    =  (mgmt_ena) ? 
-			((mgmt_gpio_oeb == 1'b1) ?
+    assign gpio_in_unbuf = pad_gpio_in;
+    assign mgmt_gpio_in = (gpio_inenb == 1'b0 && gpio_outenb == 1'b1) ?
+			pad_gpio_in : 1'bz;
+    assign pad_gpio_outenb = (mgmt_ena) ? ((mgmt_gpio_oeb == 1'b1) ?
+			gpio_outenb : 1'b0) : user_gpio_oeb;
+    assign pad_gpio_out = (mgmt_ena) ? ((mgmt_gpio_oeb == 1'b1) ?
 			((gpio_dm[2:1] == 2'b01) ? ~gpio_dm[0] : mgmt_gpio_out) :
-			mgmt_gpio_out) :
-			user_gpio_out; 
+			mgmt_gpio_out) : user_gpio_out; 
 
     /* Buffer user_gpio_in with an enable that is set by the user domain vccd */
 

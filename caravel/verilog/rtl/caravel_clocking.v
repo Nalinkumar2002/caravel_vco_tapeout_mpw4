@@ -18,8 +18,8 @@
 
 module caravel_clocking(
 `ifdef USE_POWER_PINS
-    input vdd1v8,
-    input vss,
+    input VPWR,
+    input VGND,
 `endif
     input resetb, 	// Master (negative sense) reset
     input ext_clk_sel,	// 0=use PLL clock, 1=use external (pad) clock
@@ -97,7 +97,7 @@ module caravel_clocking(
     // Staged-delay reset
     reg [2:0] reset_delay;
 
-    always @(posedge core_clk or negedge resetb) begin
+    always @(negedge core_clk or negedge resetb) begin
         if (resetb == 1'b0) begin
         reset_delay <= 3'b111;
         end else begin

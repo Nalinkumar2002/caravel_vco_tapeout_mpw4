@@ -14,34 +14,43 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-FIRMWARE_PATH = ../..
-VERILOG_PATH = ../../../..
 PDK_PATH = $(PDK_ROOT)/sky130A
+VERILOG_PATH = ../../../..
 RTL_PATH = $(VERILOG_PATH)/rtl
 BEHAVIOURAL_MODELS = ../../ 
 
+FIRMWARE_PATH = ../..
 GCC_PATH?=/ef/apps/bin
 GCC_PREFIX?=riscv32-unknown-elf
 
 SIM_DEFINES = -DFUNCTIONAL -DSIM
+
 SIM?=RTL
 
 .SUFFIXES:
 
 PATTERN = irq
 
+# Path to management SoC wrapper repository
+MGMT_CORE_PATH ?= ~/gits/caravel_pico
+ifeq ($(SIM),RTL)
+	MGMT_WRAPPER_PATH = $(MGMT_CORE_PATH)/verilog/rtl
+else
+	MGMT_WRAPPER_PATH = $(MGMT_CORE_PATH)/verilog
+endif
+
 all:  ${PATTERN:=.vcd}
 
-ex:  ${PATTERN:=.hex}
+hex:  ${PATTERN:=.hex}
 
 %.vvp: %_tb.v %.hex
 ifeq ($(SIM),RTL)
 	iverilog -Ttyp $(SIM_DEFINES) -I $(BEHAVIOURAL_MODELS) \
-	-I $(PDK_PATH) -I $(RTL_PATH) \
+	-I $(PDK_PATH) -I $(RTL_PATH) -I $(MGMT_WRAPPER_PATH) \
 	$< -o $@ 
 else  
 	iverilog -Ttyp $(SIM_DEFINES) -DGL -I $(BEHAVIOURAL_MODELS) \
-	-I $(PDK_PATH) -I $(VERILOG_PATH) -I $(RTL_PATH) \
+	-I $(PDK_PATH) -I $(VERILOG_PATH) -I $(RTL_PATH) -I $(MGMT_WRAPPER_PATH) \
 	$< -o $@ 
 endif
 

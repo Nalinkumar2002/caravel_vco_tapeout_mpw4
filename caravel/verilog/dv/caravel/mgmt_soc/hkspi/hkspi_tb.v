@@ -159,7 +159,7 @@ module hkspi_tb;
 	    read_byte(tbdata);
 	    end_csb();
 	    #10;
-	    $display("Read data = 0x%02x (should be 0x10)", tbdata);
+	    $display("Read data = 0x%02x (should be 0x11)", tbdata);
 
 	    // Toggle external reset
 	    start_csb();
@@ -207,8 +207,8 @@ module hkspi_tb;
 			`endif
 		end
 	    read_byte(tbdata);
-	    $display("Read register 3 = 0x%02x (should be 0x10)", tbdata);
-		if(tbdata !== 8'h10) begin 
+	    $display("Read register 3 = 0x%02x (should be 0x11)", tbdata);
+		if(tbdata !== 8'h11) begin 
 			`ifdef GL
 				$display("Monitor: Test HK SPI (GL) Failed, %02x", tbdata); $finish; 
 			`else

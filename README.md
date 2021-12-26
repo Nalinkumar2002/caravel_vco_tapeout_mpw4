@@ -1,4 +1,4 @@
-</br>
+﻿</br>
 
 ---
 
@@ -47,7 +47,7 @@ It is a Current Starved Voltage Controlled Oscillator targerting 180nm tech for 
  * [Observations](#Observations)
  * [Future Work](#Future-work)
  * [Author](#Author)
- 
+ * [Acknowledgements](#Acknowledgements)
    
    
 
@@ -595,5 +595,9 @@ The result of transient analysis of VCO @ `vctrl = 0.9 V` is shown below
  
   🖊️ Nalinkumar S , B.E (Electronics and Communication Engineering), Madras Institute of Technology, Anna University, Tamil Nadu 
  
+ 
+ # Acknowledgements
+
+ 📖 Kunal Ghosh, Co-Founder of VLSI System Design (VSD) Corp. Pvt. Ltd. - kunalpghosh@gmail.com
 
 ---

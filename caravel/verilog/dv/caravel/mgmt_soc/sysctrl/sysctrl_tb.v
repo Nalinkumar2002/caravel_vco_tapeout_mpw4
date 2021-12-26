@@ -23,8 +23,9 @@
 
 module sysctrl_tb;
 	reg clock;
+	reg power1;
+	reg power2;
 	reg RSTB;
-	reg power1, power2;
 
 	wire gpio;
 	wire [15:0] checkbits;
@@ -36,6 +37,9 @@ module sysctrl_tb;
 	wire flash_io1;
 	wire SDO;
 
+	integer ccount;
+	integer ucount;
+
 	assign checkbits = mprj_io[31:16];
 	assign spivalue  = mprj_io[15:8];
 
@@ -44,6 +48,16 @@ module sysctrl_tb;
 	// would be the fast clock.
 
 	always #10 clock <= (clock === 1'b0);
+
+	// User clock monitoring
+	always @(posedge mprj_io[15]) begin
+	    ucount = ucount + 1;
+	end
+
+	// Core clock monitoring
+	always @(posedge mprj_io[14]) begin
+	    ccount = ccount + 1;
+	end
 
 	initial begin
 		clock = 0;
@@ -57,97 +71,50 @@ module sysctrl_tb;
 			$display("+1000 cycles");
 		end
 		$display("%c[1;31m",27);
-		`ifdef GL
-			$display ("Monitor: Timeout, Test Sysctrl (GL) Failed");
-		`else
-			$display ("Monitor: Timeout, Test Sysctrl (RTL) Failed");
-		`endif
-		 $display("%c[0m",27);
+		$display ("Monitor: Timeout, Test Sysctrl (RTL) Failed");
+		$display("%c[0m",27);
 		$finish;
 	end
 
 	// Monitor
 	initial begin
 	    wait(checkbits == 16'hA040);
-			`ifdef GL
-            	$display("Monitor: Test Sysctrl (GL) Started");
-			`else
-			    $display("Monitor: Test Sysctrl (RTL) Started");
-			`endif
+	    $display("Monitor: Test 1 Sysctrl (RTL) Started");
+	    ucount = 0;
+	    ccount = 0;
 	    wait(checkbits == 16'hA041);
-            $display("   SPI value = 0x%x (should be 0x04)", spivalue);
-            if(spivalue !== 32'h04) begin
+	    $display("Monitor: ucount = %d ccount = %d", ucount, ccount);
+            if (ucount !== 0 || ccount != 0) begin
                 $display("Monitor: Test Sysctrl Failed");
                 $finish;
             end
+		
 	    wait(checkbits == 16'hA042);
-            $display("   SPI value = 0x%x (should be 0x56)", spivalue);
-            if(spivalue !== 32'h56) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
+	    $display("Monitor: Test 1 Sysctrl (RTL) Started");
+	    ucount = 0;
+	    ccount = 0;
 	    wait(checkbits == 16'hA043);
-            $display("   SPI value = 0x%x (should be 0x10)", spivalue);
-            if(spivalue !== 32'h10) begin
+	    $display("Monitor: ucount = %d ccount = %d", ucount, ccount);
+            if (ucount !== 129 || ccount != 0) begin
                 $display("Monitor: Test Sysctrl Failed");
                 $finish;
             end
+		
 	    wait(checkbits == 16'hA044);
-            $display("   SPI value = 0x%x (should be 0x02)", spivalue);
-            if(spivalue !== 32'h02) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
+	    $display("Monitor: Test 2 Sysctrl (RTL) Started");
+	    ucount = 0;
+	    ccount = 0;
 	    wait(checkbits == 16'hA045);
-            $display("   SPI value = 0x%x (should be 0x01)", spivalue);
-            if(spivalue !== 32'h01) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
-	    wait(checkbits == 16'hA046);
-            $display("   SPI value = 0x%x (should be 0xff)", spivalue);
-            if(spivalue !== 32'hff) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
-	    wait(checkbits == 16'hA047);
-            $display("   SPI value = 0x%x (should be 0xef)", spivalue);
-            if(spivalue !== 32'hef) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
-	    wait(checkbits == 16'hA048);
-            $display("   SPI value = 0x%x (should be 0xff)", spivalue);
-            if(spivalue !== 32'hff) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
-	    wait(checkbits == 16'hA049);
-            $display("   SPI value = 0x%x (should be 0x03)", spivalue);
-            if(spivalue !== 32'h03) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
-	    wait(checkbits == 16'hA04a);
-            $display("   SPI value = 0x%x (should be 0x12)", spivalue);
-            if(spivalue !== 32'h12) begin
-                $display("Monitor: Test Sysctrl Failed");
-                $finish;
-            end
-	    wait(checkbits == 16'hA04b);
-            $display("   SPI value = 0x%x (should be 0x04)", spivalue);
-            if(spivalue !== 32'h04) begin
+	    $display("Monitor: ucount = %d ccount = %d", ucount, ccount);
+            if (ucount !== 0 || ccount != 129) begin
                 $display("Monitor: Test Sysctrl Failed");
                 $finish;
             end
 
 	    wait(checkbits == 16'hA090);
-		 	`ifdef GL
-            	$display("Monitor: Test Sysctrl (GL) Passed");
-			`else
-		        $display("Monitor: Test Sysctrl (RTL) Passed");
-			`endif
-            $finish;
+
+	    $display("Monitor: Test Sysctrl (RTL) Passed");
+	    $finish;
 	end
 
 	initial begin
@@ -157,7 +124,7 @@ module sysctrl_tb;
 		#2000;
 	end
 
-	initial begin		// Power-up sequence
+	initial begin
 		power1 <= 1'b0;
 		power2 <= 1'b0;
 		#200;
@@ -178,22 +145,18 @@ module sysctrl_tb;
 	assign VDD1V8 = power2;
 	assign VSS = 1'b0;
 
-	assign mprj_io[3] = 1'b1;
-	
+	assign mprj_io[3] = 1'b1;  // Force CSB high.
+
 	caravel uut (
 		.vddio	  (VDD3V3),
-		.vddio_2  (VDD3V3),
 		.vssio	  (VSS),
-		.vssio_2  (VSS),
 		.vdda	  (VDD3V3),
 		.vssa	  (VSS),
 		.vccd	  (VDD1V8),
 		.vssd	  (VSS),
 		.vdda1    (VDD3V3),
-		.vdda1_2  (VDD3V3),
 		.vdda2    (VDD3V3),
 		.vssa1	  (VSS),
-		.vssa1_2  (VSS),
 		.vssa2	  (VSS),
 		.vccd1	  (VDD1V8),
 		.vccd2	  (VDD1V8),
